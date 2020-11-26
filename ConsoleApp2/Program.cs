@@ -14,46 +14,60 @@ namespace ConsoleApp2
     {
         static void Main(string[] args)
         {
-            string[] Fileline = File.ReadAllLines(@"C:\Users\drw_0\Documents\kv.txt");
+            string FilePath = @"C:\Users\drw_0\Documents\kv.txt";
+            
+            if(Directory.Exists(FilePath))
+            { 
+                string[] Fileline = File.ReadAllLines(FilePath);
+                Hashtable hashtable = new Hashtable();
 
-            Hashtable hashtable = new Hashtable();
-
-            foreach (string line in Fileline)
-            {
-                if (line.Contains("="))
+                foreach (string line in Fileline)
                 {
-                    hashtable.Add(line.Split('=')[0], line.Split('=')[1]);
+                    if (line.Contains("="))
+                    {
+                        hashtable.Add(line.Split('=')[0], line.Split('=')[1]);
+                    }
+                }
+
+                Console.WriteLine(hashtable["k2"]);
+
+                foreach (DictionaryEntry line in hashtable)
+                {
+                    Console.Write(line.Key + "\t:");
+                    Console.WriteLine(hashtable[line.Key]);
                 }
             }
 
-            Console.WriteLine(hashtable["k2"]);
-
-            foreach (DictionaryEntry line in hashtable)
-            {
-                Console.Write(line.Key + "\t:");
-                Console.WriteLine(hashtable[line.Key]);
-            }
 
             var dt = GetDataFromExcel(@"C:\Users\drw_0\OneDrive\Documents\Test\Book1.xlsx", "sheet1");
 
-            /*
             foreach (DataRow row in dt.Rows)
             {
                 foreach (var item in row.ItemArray)
                 {
+                    //if (!String.IsNullOrEmpty(item.ToString()))
                     Console.WriteLine(item);
                 }
             }
             Console.ReadLine();
-            */
+            
 
-            var grouped = from table in dt.AsEnumerable()
-                          group table by new { c1 = table["c1"] } into groupby
-                          select new
-                          {
-                              Value = groupby.Key,
-                              ColumnValues = groupby
-                          };
+            var distinctIds = dt.AsEnumerable()
+                              .Select(s => new
+                              {
+                                  id = s.Field<string>("c1"),
+                              })
+                              .Distinct().ToList();
+            string items = string.Join(Environment.NewLine, distinctIds);
+            Console.WriteLine(items);
+            Console.ReadLine();
+            /*
+            select new
+            {
+                Value = groupby.Key,
+                ColumnValues = groupby
+            };
+            */
 
             /*
             var groupby = dt.AsEnumerable().GroupBy ( d=> new
@@ -69,7 +83,7 @@ namespace ConsoleApp2
                 c3 = x.Key.c3,
                 c4 = x.Key.c4,
             });
-            */
+            
 
             foreach (var key in grouped)
 
@@ -93,7 +107,9 @@ namespace ConsoleApp2
 
             }
             Console.ReadLine();
+        */
         }
+
 
         public static DataTable GetDataFromExcel(string path, dynamic worksheet)
         {
@@ -135,10 +151,10 @@ namespace ConsoleApp2
                         DataRow toInsert = dt.NewRow();
                         foreach (IXLCell cell in row.Cells(1, dt.Columns.Count))
                         {
-                            try
-                            {
-                                toInsert[i] = cell.Value.ToString();
-                            }
+                           try
+                           {
+                             toInsert[i] = cell.Value.ToString();
+                           }
                             catch (Exception ex)
                             {
 
