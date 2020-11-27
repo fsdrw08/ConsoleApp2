@@ -39,14 +39,40 @@ namespace ConsoleApp2
             }
 
 
-            var dt = GetDataFromExcel(@"C:\Users\drw_0\OneDrive\Documents\Test\Book1.xlsx", "sheet1");
+            var dt = GetDataFromExcel(@"C:\Users\drw_0\OneDrive\Documents\Test\book1.xlsx", "sheet1");
+            /*
+            for (int i = dt.Rows.Count -1; i >= 0; i--)
+            {
+                if (String.IsNullOrEmpty(dt.Rows.ToString()))
+                {
+                    dt.Rows[i].Delete();
+                }
+            }
+            dt.AcceptChanges();
+            */
+            foreach (DataRow row in dt.Rows)
+            {
+                int needDel = 0;
+                foreach (var _ in from item in row.ItemArray
+                                  where string.IsNullOrEmpty(item.ToString())
+                                  select new { }
+                )
+                {
+                    needDel += 1;
+                }
+
+                if (needDel == row.ItemArray.Count())
+                {
+                    row.Delete();
+                }
+            }
+            dt.AcceptChanges();
 
             foreach (DataRow row in dt.Rows)
             {
                 foreach (var item in row.ItemArray)
                 {
-                    //if (!String.IsNullOrEmpty(item.ToString()))
-                    Console.WriteLine(item);
+                    Console.WriteLine(item.ToString());
                 }
             }
             Console.ReadLine();
@@ -155,15 +181,20 @@ namespace ConsoleApp2
                            {
                              toInsert[i] = cell.Value.ToString();
                            }
-                            catch (Exception ex)
-                            {
+                           catch (Exception ex)
+                           {
 
-                            }
+                           }
                             i++;
                         }
+                        if(!string.IsNullOrEmpty(toInsert.ToString()))
                         dt.Rows.Add(toInsert);
                     }
                 }
+
+             
+                //dt.Rows[dt.Rows.Count - 1].Delete();
+                dt.AcceptChanges();
                 return dt;
             }
         }
