@@ -38,35 +38,8 @@ namespace ConsoleApp2
                 }
             }
 
-
-            var dt = GetDataFromExcel(@"C:\Users\drw_0\OneDrive\Documents\Test\book1.xlsx", "sheet1");
-            /*
-            for (int i = dt.Rows.Count -1; i >= 0; i--)
-            {
-                if (String.IsNullOrEmpty(dt.Rows.ToString()))
-                {
-                    dt.Rows[i].Delete();
-                }
-            }
-            dt.AcceptChanges();
-            */
-            foreach (DataRow row in dt.Rows)
-            {
-                int needDel = 0;
-                foreach (var _ in from item in row.ItemArray
-                                  where string.IsNullOrEmpty(item.ToString())
-                                  select new { }
-                )
-                {
-                    needDel += 1;
-                }
-
-                if (needDel == row.ItemArray.Count())
-                {
-                    row.Delete();
-                }
-            }
-            dt.AcceptChanges();
+            
+            var dt = RemoveDTEmptyRows(GetDataFromExcel(@"C:\Users\drw_0\OneDrive\Documents\Test\book1.xlsx", "sheet1"));
 
             foreach (DataRow row in dt.Rows)
             {
@@ -87,6 +60,7 @@ namespace ConsoleApp2
             string items = string.Join(Environment.NewLine, distinctIds);
             Console.WriteLine(items);
             Console.ReadLine();
+
             /*
             select new
             {
@@ -199,5 +173,28 @@ namespace ConsoleApp2
             }
         }
 
+        public static DataTable RemoveDTEmptyRows(DataTable dt)
+        {
+
+            foreach (DataRow row in dt.Rows)
+            {
+                int needDel = 0;
+                foreach (var _ in from item in row.ItemArray
+                                  where string.IsNullOrEmpty(item.ToString())
+                                  select new { }
+                )
+                {
+                    needDel += 1;
+                }
+
+                if (needDel == row.ItemArray.Count())
+                {
+                    row.Delete();
+                }
+            }
+            dt.AcceptChanges();
+
+            return dt;
+        }
     }
 }
