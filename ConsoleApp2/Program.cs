@@ -62,6 +62,46 @@ namespace ConsoleApp2
             Console.ReadLine();
 
             /*
+            DataView dv = new DataView(dt);
+            dv.RowFilter = "(c1 == 'c1a')";
+            */
+
+            /*
+            var where = (from row in dt.AsEnumerable()
+                        where row.Field<string>("c1") == "c1a"
+                        select row).ToList();
+            Console.WriteLine(string.Join(Environment.NewLine, where));
+            Console.ReadLine();
+            */
+
+            var where = dt.AsEnumerable()
+                        .Where(row => row.Field<string>("c1") == "c1a")
+                        .CopyToDataTable();
+            //string output = string.Join(Environment.NewLine, where);
+            foreach (DataRow row in where.Rows)
+            {
+                foreach (var item in row.ItemArray)
+                {
+                    Console.WriteLine(item.ToString());
+                }
+            }
+            Console.ReadLine();
+
+            //https://github.com/ClosedXML/ClosedXML/wiki/Adding-DataTable-as-Worksheet
+
+            /*
+            foreach (string item in distinctIds)
+            {
+                List<DataTable> each = dt.AsEnumerable()
+                    .Where(w => w.Field<string>("c1").Equals(item))
+                    .GroupBy(x => x.Field<int>("c1"))
+                    .Select(grp => grp.CopyToDataTable())
+                    .ToList();
+                Console.WriteLine(string.Join(Environment.NewLine, each));
+            }
+            Console.ReadLine();
+            */
+            /*
             select new
             {
                 Value = groupby.Key,
