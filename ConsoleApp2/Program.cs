@@ -39,7 +39,7 @@ namespace ConsoleApp2
             }
 
             
-            var dt = RemoveDTEmptyRows(GetDataFromExcel(@"C:\Users\drw_0\OneDrive\Documents\Test\book1.xlsx", "sheet1"));
+            var dt = /*RemoveDTEmptyRows*/ (GetDataFromExcel(@"C:\Users\drw_0\OneDrive\Documents\Test\book1.xlsx", "sheet1"));
 
             foreach (DataRow row in dt.Rows)
             {
@@ -52,30 +52,47 @@ namespace ConsoleApp2
             
 
             var distinctIds = dt.AsEnumerable()
-                              .Select(s => new
+                              .Where(s_ => !string.IsNullOrEmpty(s_.Field<string>("c1")))
+                              .Select(s_ => new
                               {
-                                  id = s.Field<string>("c1"),
+                                  id = s_.Field<string>("c1"),
                               })
                               .Distinct().ToList();
             string items = string.Join(Environment.NewLine, distinctIds);
             Console.WriteLine(items);
             Console.ReadLine();
 
-            /*
-            DataView dv = new DataView(dt);
-            dv.RowFilter = "(c1 == 'c1a')";
-            */
+            foreach(var item in distinctIds)
+            {
+                var each = dt.AsEnumerable()
+                        .Where(s_ => s_.Field<string>("c1") == item.id.ToString())
+                        .CopyToDataTable();
 
-            /*
-            var where = (from row in dt.AsEnumerable()
-                        where row.Field<string>("c1") == "c1a"
-                        select row).ToList();
-            Console.WriteLine(string.Join(Environment.NewLine, where));
-            Console.ReadLine();
-            */
+                each.TableName = "sheet1";
+
+                //https://github.com/ClosedXML/ClosedXML/wiki/Adding-DataTable-as-Worksheet
+                var wb = new XLWorkbook();
+                wb.Worksheets.Add(each);
+
+                string fileName = string.Format("C:\\Users\\drw_0\\Documents\\test\\{0}.xlsx",item.id);
+                wb.SaveAs(fileName,true);
+                
+                
+                Console.WriteLine(each.TableName);
+                foreach (DataRow row in each.Rows)
+                {
+                    foreach (var cell in row.ItemArray)
+                    {
+                        Console.WriteLine(cell.ToString());
+                    }
+                    Console.WriteLine("-----");
+                }
+                Console.WriteLine("=====");
+                Console.ReadLine();
+            }
 
             var where = dt.AsEnumerable()
-                        .Where(row => row.Field<string>("c1") == "c1a")
+                        .Where(s_ => s_.Field<string>("c1") == "c1a")
                         .CopyToDataTable();
             //string output = string.Join(Environment.NewLine, where);
             foreach (DataRow row in where.Rows)
@@ -87,67 +104,7 @@ namespace ConsoleApp2
             }
             Console.ReadLine();
 
-            //https://github.com/ClosedXML/ClosedXML/wiki/Adding-DataTable-as-Worksheet
 
-            /*
-            foreach (string item in distinctIds)
-            {
-                List<DataTable> each = dt.AsEnumerable()
-                    .Where(w => w.Field<string>("c1").Equals(item))
-                    .GroupBy(x => x.Field<int>("c1"))
-                    .Select(grp => grp.CopyToDataTable())
-                    .ToList();
-                Console.WriteLine(string.Join(Environment.NewLine, each));
-            }
-            Console.ReadLine();
-            */
-            /*
-            select new
-            {
-                Value = groupby.Key,
-                ColumnValues = groupby
-            };
-            */
-
-            /*
-            var groupby = dt.AsEnumerable().GroupBy ( d=> new
-            {
-                c1 = d.Field<string>("c1"),
-                c2 = d.Field<string>("c2"),
-                c3 = d.Field<string>("c3"),
-                c4 = d.Field<string>("c4"),
-            })
-            .Select(x => new {
-                c1 = x.Key.c1,
-                c2 = x.Key.c2,
-                c3 = x.Key.c3,
-                c4 = x.Key.c4,
-            });
-            
-
-            foreach (var key in grouped)
-
-            {
-
-                Console.WriteLine(key.Value.c1);
-
-                Console.WriteLine("---------------------------");
-
-                foreach (var columnValue in key.ColumnValues)
-
-                {
-
-                    Console.WriteLine(columnValue["c2"].ToString());
-                    Console.WriteLine(columnValue["c3"].ToString());
-                    Console.WriteLine(columnValue["c3"].ToString());
-
-                }
-
-                Console.WriteLine();
-
-            }
-            Console.ReadLine();
-        */
         }
 
 
